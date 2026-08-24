@@ -18,7 +18,7 @@ var createOpts = new(createOptions)
 var CreateCmd = &cobra.Command{
 	Use:   "create ARCHIVE FILE...",
 	Short: "Create sack archive",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.MinimumNArgs(2),
 	Run:   createRun,
 }
 var outputFile string
