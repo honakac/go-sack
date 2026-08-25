@@ -64,7 +64,7 @@ func scanFolder(w *lib.Writer, dir string, name string) error {
 			}
 
 			if err := addFile(w, filepath, namepath, s); err != nil {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			if err := scanFolder(w, filepath, namepath); err != nil {
