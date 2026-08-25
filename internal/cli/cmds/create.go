@@ -42,7 +42,9 @@ func addFile(w *lib.Writer, filepath string, name string, s os.FileInfo) error {
 		fmt.Printf("Packing %s...\n", name)
 	}
 
-	w.AddStream(lib.CleanPath(name, true), s.Size(), uint32(s.Mode()), r)
+	if err := w.AddStream(lib.CleanPath(name, true), s.Size(), uint32(s.Mode()), r); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -62,7 +64,7 @@ func scanFolder(w *lib.Writer, dir string, name string) error {
 			if err != nil {
 				return err
 			}
-			
+
 			if err := addFile(w, filepath, namepath, s); err != nil {
 				return err
 			}
