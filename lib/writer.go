@@ -67,7 +67,7 @@ func (w *Writer) writeTOC() error {
 		return err
 	}
 
-	if _, err := w.w.Write([]byte("SACK")); err != nil {
+	if _, err := w.w.Write(Magic[:]); err != nil {
 		return err
 	}
 
