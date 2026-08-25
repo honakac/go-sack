@@ -11,6 +11,7 @@ type Writer struct {
 	w       io.Writer
 	offset  int64
 	entries []FileHeader
+	buf     [22]byte
 }
 
 func NewWriter(w io.Writer) (*Writer, error) {
@@ -50,12 +51,18 @@ func (w *Writer) AddStream(name string, size int64, mode uint32, r io.Reader) er
 func (w *Writer) writeTOC() error {
 	tocStartOffset := w.offset
 
-	if err := binary.Write(w.w, binary.LittleEndian, uint32(len(w.entries))); err != nil {
+	binary.LittleEndian.PutUint32(w.buf[0:4], uint32(len(w.entries)))
+	if _, err := w.w.Write(w.buf[0:4]); err != nil {
 		return err
 	}
 
 	for _, e := range w.entries {
-		if err := binary.Write(w.w, binary.LittleEndian, e.Info); err != nil {
+		binary.LittleEndian.PutUint16(w.buf[0:2], e.Info.NameLength)
+		binary.LittleEndian.PutUint64(w.buf[2:10], uint64(e.Info.Size))
+		binary.LittleEndian.PutUint64(w.buf[10:18], uint64(e.Info.Offset))
+		binary.LittleEndian.PutUint32(w.buf[18:22], e.Info.Mode)
+
+		if _, err := w.w.Write(w.buf[0:22]); err != nil {
 			return err
 		}
 		if _, err := w.w.Write(unsafe.Slice(unsafe.StringData(e.Name), len(e.Name))); err != nil {
@@ -63,11 +70,12 @@ func (w *Writer) writeTOC() error {
 		}
 	}
 
-	if err := binary.Write(w.w, binary.LittleEndian, tocStartOffset); err != nil {
+	binary.LittleEndian.PutUint64(w.buf[0:8], uint64(tocStartOffset))
+	if _, err := w.w.Write(w.buf[0:8]); err != nil {
 		return err
 	}
 
-	if _, err := w.w.Write(Magic[:]); err != nil {
+	if _, err := w.w.Write(Magic[0:4]); err != nil {
 		return err
 	}
 
