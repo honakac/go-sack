@@ -38,6 +38,10 @@ func addFile(w *lib.Writer, filepath string, name string, s os.FileInfo) error {
 	}
 	defer r.Close()
 
+	if *createOpts.verbose {
+		fmt.Printf("Packing %s...\n", name)
+	}
+
 	w.AddStream(lib.CleanPath(name, true), s.Size(), uint32(s.Mode()), r)
 
 	return nil
@@ -58,11 +62,7 @@ func scanFolder(w *lib.Writer, dir string, name string) error {
 			if err != nil {
 				return err
 			}
-
-			if *createOpts.verbose {
-				fmt.Printf("Packing %s...\n", namepath)
-			}
-
+			
 			if err := addFile(w, filepath, namepath, s); err != nil {
 				return err
 			}
