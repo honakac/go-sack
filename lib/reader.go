@@ -3,7 +3,6 @@ package lib
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"unsafe"
 )
@@ -11,6 +10,7 @@ import (
 type Reader struct {
 	r     io.ReadSeeker
 	Files []FileHeader
+	buf   [22]byte
 }
 
 func NewReader(r io.ReadSeeker) (*Reader, error) {
@@ -56,10 +56,10 @@ func (r *Reader) readTOC() error {
 		return err
 	}
 
-	var tocStartOffset int64
-	if err := binary.Read(r.r, binary.LittleEndian, &tocStartOffset); err != nil {
+	if _, err := io.ReadFull(r.r, r.buf[0:8]); err != nil {
 		return err
 	}
+	tocStartOffset := int64(binary.LittleEndian.Uint64(r.buf[0:8]))
 
 	var magic [4]byte
 	if _, err := io.ReadFull(r.r, magic[:]); err != nil {
@@ -73,25 +73,24 @@ func (r *Reader) readTOC() error {
 		return err
 	}
 
-	var count uint32
-	if err := binary.Read(r.r, binary.LittleEndian, &count); err != nil {
+	if _, err := io.ReadFull(r.r, r.buf[0:4]); err != nil {
 		return err
 	}
+	count := binary.LittleEndian.Uint32(r.buf[0:4])
 
 	r.Files = make([]FileHeader, count)
 	for i := range count {
-		if err := binary.Read(r.r, binary.LittleEndian, &r.Files[i].Info); err != nil {
+		if _, err := io.ReadFull(r.r, r.buf[0:22]); err != nil {
 			return err
 		}
+		r.Files[i].Info.NameLength = binary.LittleEndian.Uint16(r.buf[0:2])
+		r.Files[i].Info.Size = int64(binary.LittleEndian.Uint64(r.buf[2:10]))
+		r.Files[i].Info.Offset = int64(binary.LittleEndian.Uint64(r.buf[10:18]))
+		r.Files[i].Info.Mode = binary.LittleEndian.Uint32(r.buf[18:22])
 
 		name := make([]byte, r.Files[i].Info.NameLength)
-		n, err := r.r.Read(name)
-		if err != nil {
+		if _, err := io.ReadFull(r.r, name); err != nil {
 			return err
-		}
-		if uint16(n) != r.Files[i].Info.NameLength {
-			return fmt.Errorf("invalid read name, file size(%d) != buffer(%d)",
-				n, r.Files[i].Info.Size)
 		}
 
 		r.Files[i].Name = unsafe.String(unsafe.SliceData(name), len(name))
