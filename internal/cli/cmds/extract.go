@@ -49,7 +49,7 @@ func ExtractRun(cmd *cobra.Command, args []string) {
 
 		origDir := filepath.Dir(f.Name)
 		dir := fmt.Sprintf("%s/%s", *extractOpts.dir, origDir)
-		if dir != "./." && dir != ".//" {
+		if origDir != "." && origDir != "/" {
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				log.Fatal(err)
 			}
