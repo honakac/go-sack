@@ -32,7 +32,7 @@ func listRun(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	for _, f := range r.Files {
-		fmt.Println(f.String())
+	for k, f := range r.Files {
+		fmt.Printf("%s '%s' %d bytes\n", os.FileMode(f.Mode), k, f.Size)
 	}
 }

@@ -10,7 +10,7 @@ import (
 type Writer struct {
 	w       io.Writer
 	offset  int64
-	entries []FileHeader
+	entries map[string]FileHeaderInfo
 	buf     [22]byte
 }
 
@@ -20,18 +20,19 @@ func NewWriter(w io.Writer) (*Writer, error) {
 		return nil, err
 	}
 
-	return &Writer{w: w, offset: 1}, nil
+	return &Writer{
+		w: w,
+		offset: 1,
+		entries: make(map[string]FileHeaderInfo),
+	}, nil
 }
 
 func (w *Writer) AddStream(name string, size int64, mode uint32, r io.Reader) error {
-	header := FileHeader{
-		Name: name,
-		Info: FileHeaderInfo{
-			NameLength: uint16(len(name)),
-			Size:       size,
-			Mode:       mode,
-			Offset:     w.offset,
-		},
+	header := FileHeaderInfo{
+		NameLength: uint16(len(name)),
+		Size:       size,
+		Mode:       mode,
+		Offset:     w.offset,
 	}
 
 	written, err := io.Copy(w.w, r)
@@ -43,7 +44,7 @@ func (w *Writer) AddStream(name string, size int64, mode uint32, r io.Reader) er
 	}
 
 	w.offset += written
-	w.entries = append(w.entries, header)
+	w.entries[name] = header
 
 	return nil
 }
@@ -56,16 +57,16 @@ func (w *Writer) writeTOC() error {
 		return err
 	}
 
-	for _, e := range w.entries {
-		binary.LittleEndian.PutUint16(w.buf[0:2], e.Info.NameLength)
-		binary.LittleEndian.PutUint64(w.buf[2:10], uint64(e.Info.Size))
-		binary.LittleEndian.PutUint64(w.buf[10:18], uint64(e.Info.Offset))
-		binary.LittleEndian.PutUint32(w.buf[18:22], e.Info.Mode)
+	for k, e := range w.entries {
+		binary.LittleEndian.PutUint16(w.buf[0:2], e.NameLength)
+		binary.LittleEndian.PutUint64(w.buf[2:10], uint64(e.Size))
+		binary.LittleEndian.PutUint64(w.buf[10:18], uint64(e.Offset))
+		binary.LittleEndian.PutUint32(w.buf[18:22], e.Mode)
 
 		if _, err := w.w.Write(w.buf[0:22]); err != nil {
 			return err
 		}
-		if _, err := w.w.Write(unsafe.Slice(unsafe.StringData(e.Name), len(e.Name))); err != nil {
+		if _, err := w.w.Write(unsafe.Slice(unsafe.StringData(k), len(k))); err != nil {
 			return err
 		}
 	}

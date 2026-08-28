@@ -39,15 +39,15 @@ func ExtractRun(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	for _, f := range r.Files {
-		f.Name = lib.CleanPath(f.Name, true)
+	for k, f := range r.Files {
+		k = lib.CleanPath(k, true)
 
 		reader, err := r.OpenFile(f)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		origDir := filepath.Dir(f.Name)
+		origDir := filepath.Dir(k)
 		dir := fmt.Sprintf("%s/%s", *extractOpts.dir, origDir)
 		if origDir != "." && origDir != "/" {
 			if err := os.MkdirAll(dir, 0755); err != nil {
@@ -55,8 +55,8 @@ func ExtractRun(cmd *cobra.Command, args []string) {
 			}
 		}
 
-		newName := fmt.Sprintf("%s/%s", *extractOpts.dir, f.Name)
-		writer, err := os.OpenFile(newName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(f.Info.Mode))
+		newName := fmt.Sprintf("%s/%s", *extractOpts.dir, k)
+		writer, err := os.OpenFile(newName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(f.Mode))
 		if err != nil {
 			log.Fatal(err)
 		}

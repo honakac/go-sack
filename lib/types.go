@@ -1,10 +1,5 @@
 package lib
 
-import (
-	"fmt"
-	"os"
-)
-
 type FileHeaderInfo struct {
 	NameLength uint16
 	Size       int64
@@ -12,11 +7,11 @@ type FileHeaderInfo struct {
 	Mode       uint32
 }
 
-type FileHeader struct {
-	Name string
-	Info FileHeaderInfo
-}
+// type FileHeader struct {
+// 	Name string
+// 	Info FileHeaderInfo
+// }
 
-func (f *FileHeader) String() string {
-	return fmt.Sprintf("%s '%s' %d bytes", os.FileMode(f.Info.Mode), f.Name, f.Info.Size)
-}
+// func (f *FileHeader) String() string {
+// 	return
+// }
