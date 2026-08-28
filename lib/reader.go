@@ -10,7 +10,6 @@ import (
 type Reader struct {
 	r     io.ReadSeeker
 	Files map[string]FileHeaderInfo
-	buf   [22]byte
 }
 
 func NewReader(r io.ReadSeeker) (*Reader, error) {
@@ -34,16 +33,18 @@ func (r *Reader) OpenFile(header FileHeaderInfo) (io.Reader, error) {
 
 // Read Table of Contents
 func (r *Reader) readTOC() error {
+	var buf [22]byte
+
 	// 12 bytes
 	// TOC offset (8 bytes) + SACK (4 bytes)
 	if _, err := r.r.Seek(-int64(len(Magic))-8, io.SeekEnd); err != nil {
 		return err
 	}
 
-	if _, err := io.ReadFull(r.r, r.buf[0:8]); err != nil {
+	if _, err := io.ReadFull(r.r, buf[0:8]); err != nil {
 		return err
 	}
-	tocStartOffset := int64(binary.LittleEndian.Uint64(r.buf[0:8]))
+	tocStartOffset := int64(binary.LittleEndian.Uint64(buf[0:8]))
 
 	var magic [4]byte
 	if _, err := io.ReadFull(r.r, magic[:]); err != nil {
@@ -57,22 +58,22 @@ func (r *Reader) readTOC() error {
 		return err
 	}
 
-	if _, err := io.ReadFull(r.r, r.buf[0:4]); err != nil {
+	if _, err := io.ReadFull(r.r, buf[0:4]); err != nil {
 		return err
 	}
-	count := binary.LittleEndian.Uint32(r.buf[0:4])
+	count := binary.LittleEndian.Uint32(buf[0:4])
 
 	r.Files = make(map[string]FileHeaderInfo, count)
 	for range count {
-		if _, err := io.ReadFull(r.r, r.buf[0:22]); err != nil {
+		if _, err := io.ReadFull(r.r, buf[0:22]); err != nil {
 			return err
 		}
 
 		info := FileHeaderInfo{
-			NameLength: binary.LittleEndian.Uint16(r.buf[0:2]),
-			Size:       int64(binary.LittleEndian.Uint64(r.buf[2:10])),
-			Offset:     int64(binary.LittleEndian.Uint64(r.buf[10:18])),
-			Mode:       binary.LittleEndian.Uint32(r.buf[18:22]),
+			NameLength: binary.LittleEndian.Uint16(buf[0:2]),
+			Size:       int64(binary.LittleEndian.Uint64(buf[2:10])),
+			Offset:     int64(binary.LittleEndian.Uint64(buf[10:18])),
+			Mode:       binary.LittleEndian.Uint32(buf[18:22]),
 		}
 
 		name := make([]byte, info.NameLength)

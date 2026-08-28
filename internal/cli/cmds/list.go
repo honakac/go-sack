@@ -32,6 +32,8 @@ func listRun(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
+	fmt.Printf("Count files: %d\n", len(r.Files))
+
 	for k, f := range r.Files {
 		fmt.Printf("%s '%s' %d bytes\n", os.FileMode(f.Mode), k, f.Size)
 	}

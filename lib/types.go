@@ -6,12 +6,3 @@ type FileHeaderInfo struct {
 	Offset     int64
 	Mode       uint32
 }
-
-// type FileHeader struct {
-// 	Name string
-// 	Info FileHeaderInfo
-// }
-
-// func (f *FileHeader) String() string {
-// 	return
-// }

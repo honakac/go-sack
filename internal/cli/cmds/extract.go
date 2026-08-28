@@ -60,6 +60,8 @@ func ExtractRun(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer writer.Close()
+
 		if _, err := io.Copy(writer, reader); err != nil {
 			log.Fatal(err)
 		}
