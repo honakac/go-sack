@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bufio"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -63,9 +64,11 @@ func (r *Reader) readTOC() error {
 	}
 	count := binary.LittleEndian.Uint32(buf[0:4])
 
+	bufr := bufio.NewReader(r.r)
+
 	r.Files = make(map[string]FileHeaderInfo, count)
 	for range count {
-		if _, err := io.ReadFull(r.r, buf[0:22]); err != nil {
+		if _, err := io.ReadFull(bufr, buf[0:22]); err != nil {
 			return err
 		}
 
@@ -77,7 +80,7 @@ func (r *Reader) readTOC() error {
 		}
 
 		name := make([]byte, info.NameLength)
-		if _, err := io.ReadFull(r.r, name); err != nil {
+		if _, err := io.ReadFull(bufr, name); err != nil {
 			return err
 		}
 
