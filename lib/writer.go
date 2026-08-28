@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -20,8 +21,8 @@ func NewWriter(w io.Writer) (*Writer, error) {
 	}
 
 	return &Writer{
-		w: w,
-		offset: 1,
+		w:       w,
+		offset:  1,
 		entries: make(map[string]FileHeaderInfo),
 	}, nil
 }
@@ -50,7 +51,7 @@ func (w *Writer) AddStream(name string, size int64, mode uint32, r io.Reader) er
 
 func (w *Writer) writeTOC() error {
 	var buf [22]byte
-	
+
 	tocStartOffset := w.offset
 
 	binary.LittleEndian.PutUint32(buf[0:4], uint32(len(w.entries)))
@@ -58,30 +59,32 @@ func (w *Writer) writeTOC() error {
 		return err
 	}
 
+	bufw := bufio.NewWriter(w.w)
+
 	for k, e := range w.entries {
 		binary.LittleEndian.PutUint16(buf[0:2], e.NameLength)
 		binary.LittleEndian.PutUint64(buf[2:10], uint64(e.Size))
 		binary.LittleEndian.PutUint64(buf[10:18], uint64(e.Offset))
 		binary.LittleEndian.PutUint32(buf[18:22], e.Mode)
 
-		if _, err := w.w.Write(buf[0:22]); err != nil {
+		if _, err := bufw.Write(buf[0:22]); err != nil {
 			return err
 		}
-		if _, err := w.w.Write(unsafe.Slice(unsafe.StringData(k), len(k))); err != nil {
+		if _, err := bufw.Write(unsafe.Slice(unsafe.StringData(k), len(k))); err != nil {
 			return err
 		}
 	}
 
 	binary.LittleEndian.PutUint64(buf[0:8], uint64(tocStartOffset))
-	if _, err := w.w.Write(buf[0:8]); err != nil {
+	if _, err := bufw.Write(buf[0:8]); err != nil {
 		return err
 	}
 
-	if _, err := w.w.Write(Magic[0:4]); err != nil {
+	if _, err := bufw.Write(Magic[0:4]); err != nil {
 		return err
 	}
 
-	return nil
+	return bufw.Flush()
 }
 
 func (w *Writer) Close() error {
