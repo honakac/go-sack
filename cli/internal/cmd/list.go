@@ -9,10 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// type createOptions struct {
-// }
-
-// var createOpts = new(createOptions)
 var ListCmd = &cobra.Command{
 	Use:   "list ARCHIVE",
 	Short: "Create sack archive",
