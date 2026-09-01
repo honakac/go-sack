@@ -27,12 +27,16 @@ func init() {
 	createOpts.verbose = CreateCmd.Flags().BoolP("verbose", "v", false, "Show debug messages")
 }
 
-func addFile(w *sack.Writer, filepath string, name string, s os.FileInfo) error {
-	if sack.CleanPath(filepath, false) == outputFile {
+func addFile(w *sack.Writer, fp string, name string, s os.FileInfo) error {
+	absPath, err := filepath.Abs(fp)
+	if err != nil {
+		return err
+	}
+	if absPath == outputFile {
 		return nil
 	}
 
-	r, err := os.Open(filepath)
+	r, err := os.Open(fp)
 	if err != nil {
 		return err
 	}
