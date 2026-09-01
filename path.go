@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 func trimRelativePrefix(p string) string {
@@ -19,11 +20,14 @@ func CleanPath(namepath string, cleanDrive bool) string {
 	str = trimRelativePrefix(str)
 
 	if cleanDrive {
-		if str[0] == '/' {
+		c := str[0]
+		cl := byte(unicode.ToLower(rune(c)))
+
+		if c == '/' {
 			str = strings.Replace(str, "/", "", 1)
-		} else if (str[0] >= 'A' || str[0] <= 'Z' || str[0] >= 'a' || str[0] <= 'z') && str[1] == ':' {
-			str = strings.Replace(str, fmt.Sprintf("%c:\\", str[0]), "", 1)
-			str = strings.Replace(str, fmt.Sprintf("%c:/", str[0]), "", 1)
+		} else if (cl >= 'a' && cl <= 'z') && str[1] == ':' {
+			str = strings.Replace(str, fmt.Sprintf("%c:\\", c), "", 1)
+			str = strings.Replace(str, fmt.Sprintf("%c:/", c), "", 1)
 		}
 	}
 	return str
