@@ -7,9 +7,7 @@ import (
 
 func trimRelativePrefix(p string) string {
 	p = strings.TrimPrefix(p, "../")
-	p = strings.TrimPrefix(p, `..\`)
 	p = strings.TrimPrefix(p, "./")
-	p = strings.TrimPrefix(p, `.\`)
 	return p
 }
 
