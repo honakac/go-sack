@@ -1,4 +1,4 @@
-module github.com/honakac/go-sack
+module github.com/honakac/sack
 
 go 1.27.0
 

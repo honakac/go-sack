@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/honakac/go-sack"
+	"github.com/honakac/sack"
 	"github.com/spf13/cobra"
 )
 

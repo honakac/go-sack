@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/honakac/go-sack/cli/internal/cmd"
+	"github.com/honakac/sack/cli/internal/cmd"
 	"github.com/spf13/cobra"
 )
 
