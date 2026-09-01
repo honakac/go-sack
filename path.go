@@ -19,7 +19,7 @@ func CleanPath(namepath string, cleanDrive bool) string {
 	str := filepath.ToSlash(filepath.Clean(namepath))
 	str = trimRelativePrefix(str)
 
-	if cleanDrive {
+	if cleanDrive && len(str) > 0 {
 		c := str[0]
 		cl := byte(unicode.ToLower(rune(c)))
 
