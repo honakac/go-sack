@@ -1,4 +1,4 @@
-package cmds
+package cmd
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/honakac/go-sack/lib"
+	"github.com/honakac/go-sack"
 	"github.com/spf13/cobra"
 )
 
@@ -34,13 +34,13 @@ func ExtractRun(cmd *cobra.Command, args []string) {
 	}
 	defer a.Close()
 
-	r, err := lib.NewReader(a)
+	r, err := sack.NewReader(a)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for k, f := range r.Files {
-		k = lib.CleanPath(k, true)
+		k = sack.CleanPath(k, true)
 
 		reader, err := r.OpenFile(f)
 		if err != nil {
@@ -60,6 +60,8 @@ func ExtractRun(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer writer.Close()
+
 		if _, err := io.Copy(writer, reader); err != nil {
 			log.Fatal(err)
 		}

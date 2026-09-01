@@ -1,9 +1,9 @@
-package cli
+package main
 
 import (
 	"log"
 
-	"github.com/honakac/go-sack/internal/cli/cmds"
+	"github.com/honakac/go-sack/cli/internal/cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -12,12 +12,12 @@ var rootCmd = &cobra.Command{
 	Short: "Sack - Just a small sack for all your files. A minimal tar alternative written in Go.",
 }
 
-func Run() {
+func main() {
 	rootCmd.AddCommand(
-		cmds.VersionCmd,
-		cmds.CreateCmd,
-		cmds.ListCmd,
-		cmds.ExtractCmd,
+		cmd.VersionCmd,
+		cmd.CreateCmd,
+		cmd.ListCmd,
+		cmd.ExtractCmd,
 	)
 
 	if err := rootCmd.Execute(); err != nil {

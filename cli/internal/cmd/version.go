@@ -1,14 +1,14 @@
-package cmds
+package cmd
 
 import (
 	"fmt"
 
-	"github.com/honakac/go-sack/lib"
+	"github.com/honakac/go-sack"
 	"github.com/spf13/cobra"
 )
 
 const (
-	Version = "1.0.4"
+	Version = "1.0.5"
 )
 
 var VersionCmd = &cobra.Command{
@@ -16,6 +16,6 @@ var VersionCmd = &cobra.Command{
 	Short: "Show version",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("go-sack cli v%s\n", Version)
-		fmt.Printf("go-sack library v%s\n", lib.Version)
+		fmt.Printf("go-sack library v%s\n", sack.Version)
 	},
 }

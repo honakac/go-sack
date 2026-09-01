@@ -1,4 +1,4 @@
-package cmds
+package cmd
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/honakac/go-sack/lib"
+	"github.com/honakac/go-sack"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +27,8 @@ func init() {
 	createOpts.verbose = CreateCmd.Flags().BoolP("verbose", "v", false, "Show debug messages")
 }
 
-func addFile(w *lib.Writer, filepath string, name string, s os.FileInfo) error {
-	if lib.CleanPath(filepath, false) == outputFile {
+func addFile(w *sack.Writer, filepath string, name string, s os.FileInfo) error {
+	if sack.CleanPath(filepath, false) == outputFile {
 		return nil
 	}
 
@@ -42,14 +42,14 @@ func addFile(w *lib.Writer, filepath string, name string, s os.FileInfo) error {
 		fmt.Printf("Packing %s...\n", name)
 	}
 
-	if err := w.AddStream(lib.CleanPath(name, true), s.Size(), uint32(s.Mode()), r); err != nil {
+	if err := w.AddStream(sack.CleanPath(name, true), s.Size(), uint32(s.Mode()), r); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func scanFolder(w *lib.Writer, dir string, name string) error {
+func scanFolder(w *sack.Writer, dir string, name string) error {
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func createRun(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	outputFile = lib.CleanPath(fmt.Sprintf("%s/%s", currentDir, args[0]), false)
+	outputFile = sack.CleanPath(fmt.Sprintf("%s/%s", currentDir, args[0]), false)
 
 	a, err := os.OpenFile(args[0], os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
 	if err != nil {
@@ -90,7 +90,7 @@ func createRun(cmd *cobra.Command, args []string) {
 	}
 	defer a.Close()
 
-	w, err := lib.NewWriter(a)
+	w, err := sack.NewWriter(a)
 	if err != nil {
 		log.Fatal(err)
 	}

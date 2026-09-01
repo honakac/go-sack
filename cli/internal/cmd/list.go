@@ -1,11 +1,11 @@
-package cmds
+package cmd
 
 import (
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/honakac/go-sack/lib"
+	"github.com/honakac/go-sack"
 	"github.com/spf13/cobra"
 )
 
@@ -27,10 +27,12 @@ func listRun(cmd *cobra.Command, args []string) {
 	}
 	defer a.Close()
 
-	r, err := lib.NewReader(a)
+	r, err := sack.NewReader(a)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("Count files: %d\n", len(r.Files))
 
 	for k, f := range r.Files {
 		fmt.Printf("%s '%s' %d bytes\n", os.FileMode(f.Mode), k, f.Size)
